@@ -1,6 +1,6 @@
-import { mockAttendance, mockStudents } from '../data/mockData.js'
 import api from './api.js'
 import { USE_MOCK } from './config.js'
+import { getAttendance, getStudents } from './mockStore.js'
 
 const normalizeOverview = (overview) => ({
   ...overview,
@@ -30,12 +30,14 @@ export const reportService = {
   async overview() {
     if (USE_MOCK) {
       const today = new Date().toISOString().slice(0, 10)
-      const todays = mockAttendance.filter((r) => r.date === today)
+      const attendance = getAttendance()
+      const students = getStudents()
+      const todays = attendance.filter((r) => r.date === today)
       const present = todays.filter((r) => r.status === 'PRESENT').length
       const absent = todays.filter((r) => r.status === 'ABSENT').length
-      const totalStudents = mockStudents.length
-      const totalRecords = mockAttendance.length
-      const presentAll = mockAttendance.filter((r) => r.status === 'PRESENT').length
+      const totalStudents = students.length
+      const totalRecords = attendance.length
+      const presentAll = attendance.filter((r) => r.status === 'PRESENT').length
       const percent = totalRecords ? Math.round((presentAll / totalRecords) * 100) : 0
       return { totalStudents, present, absent, percent, totalRecords }
     }
@@ -47,7 +49,7 @@ export const reportService = {
   async monthly() {
     if (USE_MOCK) {
       const byMonth = {}
-      for (const r of mockAttendance) {
+      for (const r of getAttendance()) {
         const m = r.date.slice(0, 7)
         byMonth[m] ||= { present: 0, absent: 0 }
         byMonth[m][r.status === 'PRESENT' ? 'present' : 'absent']++
@@ -64,7 +66,7 @@ export const reportService = {
   async trend() {
     if (USE_MOCK) {
       const map = {}
-      for (const r of mockAttendance) {
+      for (const r of getAttendance()) {
         map[r.date] ||= { present: 0, total: 0 }
         map[r.date].total++
         if (r.status === 'PRESENT') map[r.date].present++
@@ -97,8 +99,9 @@ export const reportService = {
   // GET /reports/leaderboard
   async leaderboard() {
     if (USE_MOCK) {
-      const items = mockStudents.map((s) => {
-        const rec = mockAttendance.filter((r) => r.studentId === s.id)
+      const attendance = getAttendance()
+      const items = getStudents().map((s) => {
+        const rec = attendance.filter((r) => r.studentId === s.id)
         const p = rec.filter((r) => r.status === 'PRESENT').length
         const percent = rec.length ? Math.round((p / rec.length) * 100) : 0
         return { id: s.id, name: s.name, class: s.class, percent }

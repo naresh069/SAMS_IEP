@@ -1,6 +1,6 @@
-import { mockAttendance, mockStudents } from '../data/mockData.js'
 import api from './api.js'
 import { USE_MOCK } from './config.js'
+import { getAttendance, getStudents, saveAttendance } from './mockStore.js'
 
 const normalizeAttendance = (record) => {
   const student = record.student ?? {}
@@ -17,7 +17,7 @@ export const attendanceService = {
   // GET /attendance/date?date=&className=
   async byDate(date, klass) {
     if (USE_MOCK) {
-      return mockAttendance.filter(
+      return getAttendance().filter(
         (r) => r.date === date && (!klass || r.class === klass),
       )
     }
@@ -30,7 +30,7 @@ export const attendanceService = {
   // GET /attendance/student/:id
   async byStudent(studentId) {
     if (USE_MOCK) {
-      return mockAttendance
+      return getAttendance()
         .filter((r) => r.studentId === Number(studentId))
         .sort((a, b) => b.date.localeCompare(a.date))
     }
@@ -41,15 +41,17 @@ export const attendanceService = {
   // POST /attendance/bulk  { date, className, entries: [{ studentId, status }] }
   async saveBulk(records, options = {}) {
     if (USE_MOCK) {
+      const attendance = getAttendance()
+      const students = getStudents()
       for (const r of records) {
-        const existing = mockAttendance.find(
+        const existing = attendance.find(
           (x) => x.studentId === r.studentId && x.date === r.date,
         )
         if (existing) existing.status = r.status
         else {
-          const stu = mockStudents.find((s) => s.id === r.studentId)
-          mockAttendance.push({
-            id: mockAttendance.length + 1,
+          const stu = students.find((s) => s.id === r.studentId)
+          attendance.push({
+            id: attendance.reduce((max, row) => Math.max(max, Number(row.id) || 0), 0) + 1,
             studentId: r.studentId,
             studentName: stu?.name ?? '—',
             class: stu?.class ?? '—',
@@ -58,6 +60,7 @@ export const attendanceService = {
           })
         }
       }
+      saveAttendance(attendance)
       return { saved: records.length }
     }
     const date = options.date ?? records[0]?.date
@@ -73,8 +76,10 @@ export const attendanceService = {
   // PUT /attendance/:id
   async update(id, status) {
     if (USE_MOCK) {
-      const r = mockAttendance.find((x) => x.id === Number(id))
+      const attendance = getAttendance()
+      const r = attendance.find((x) => x.id === Number(id))
       if (r) r.status = status
+      saveAttendance(attendance)
       return r
     }
     const { data } = await api.put(`/attendance/${id}`, { status })

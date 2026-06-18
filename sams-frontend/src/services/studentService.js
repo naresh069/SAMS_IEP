@@ -1,6 +1,6 @@
-import { mockStudents, mockAttendance } from '../data/mockData.js'
 import api from './api.js'
 import { USE_MOCK } from './config.js'
+import { addStudent, getAttendance, getStudents, saveStudents } from './mockStore.js'
 
 const normalizeStudent = (student) => ({
   ...student,
@@ -15,31 +15,33 @@ const normalizeSummary = (summary) => ({
 export const studentService = {
   // GET /students
   async list() {
-    if (USE_MOCK) return [...mockStudents]
+    if (USE_MOCK) return getStudents().map(normalizeStudent)
     const { data } = await api.get('/students')
     return data.map(normalizeStudent)
   },
   // GET /students/:id
   async get(id) {
-    if (USE_MOCK) return mockStudents.find((s) => s.id === Number(id))
+    if (USE_MOCK) return normalizeStudent(getStudents().find((s) => s.id === Number(id)))
     const { data } = await api.get(`/students/${id}`)
     return normalizeStudent(data)
   },
   // POST /students
   async create(payload) {
     if (USE_MOCK) {
-      const newS = { id: mockStudents.length + 1, role: 'STUDENT', ...payload }
-      mockStudents.push(newS)
-      return newS
+      return normalizeStudent(addStudent(payload))
     }
     return (await api.post('/students', payload)).data
   },
   // PUT /students/:id
   async update(id, payload) {
     if (USE_MOCK) {
-      const i = mockStudents.findIndex((s) => s.id === Number(id))
-      if (i >= 0) mockStudents[i] = { ...mockStudents[i], ...payload }
-      return mockStudents[i]
+      const students = getStudents()
+      const i = students.findIndex((s) => s.id === Number(id))
+      if (i >= 0) {
+        students[i] = normalizeStudent({ ...students[i], ...payload })
+        saveStudents(students)
+      }
+      return students[i]
     }
     const { data } = await api.put(`/students/${id}`, payload)
     return normalizeStudent(data)
@@ -47,8 +49,7 @@ export const studentService = {
   // DELETE /students/:id
   async remove(id) {
     if (USE_MOCK) {
-      const i = mockStudents.findIndex((s) => s.id === Number(id))
-      if (i >= 0) mockStudents.splice(i, 1)
+      saveStudents(getStudents().filter((s) => s.id !== Number(id)))
       return { ok: true }
     }
     return (await api.delete(`/students/${id}`)).data
@@ -56,7 +57,7 @@ export const studentService = {
   // GET /students/:id/summary
   async summary(id) {
     if (USE_MOCK) {
-      const rec = mockAttendance.filter((r) => r.studentId === Number(id))
+      const rec = getAttendance().filter((r) => r.studentId === Number(id))
       const total = rec.length
       const present = rec.filter((r) => r.status === 'PRESENT').length
       const absent = total - present
