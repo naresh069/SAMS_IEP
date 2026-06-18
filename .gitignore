@@ -1,0 +1,29 @@
+.history/
+.settings/
+.vscode/
+.project
+*.log
+logs/
+
+# Local helpers
+set_token.html
+*.local
+.env
+.env.*
+!.env.example
+
+# Frontend
+node_modules/
+dist/
+
+# Backend
+target/
+*.class
+
+# Duplicate generated/copied frontend under backend
+sams-backend/sams-frontend/
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+*.swp
