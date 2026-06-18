@@ -26,6 +26,9 @@ public class SecurityConfig {
     @Value("${app.security.disable:false}")
     private boolean disableSecurity;
 
+    @Value("${app.cors.allowed-origins}")
+    private List<String> allowedOrigins;
+
     @Bean
     public PasswordEncoder passwordEncoder() { return new BCryptPasswordEncoder(); }
 
@@ -42,6 +45,7 @@ public class SecurityConfig {
 
         http.authorizeHttpRequests(a -> a
                 .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/health").permitAll()
                 .requestMatchers("/error").permitAll()
                 .anyRequest().authenticated())
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
@@ -52,13 +56,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration c = new CorsConfiguration();
-        c.setAllowedOrigins(List.of(
-                "http://localhost:3000",
-                "http://localhost:5173",
-                "http://localhost:5174",
-                "http://127.0.0.1:5173",
-                "http://127.0.0.1:5174"
-        ));
+        c.setAllowedOrigins(allowedOrigins);
         c.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         c.setAllowedHeaders(List.of("*"));
         c.setAllowCredentials(true);

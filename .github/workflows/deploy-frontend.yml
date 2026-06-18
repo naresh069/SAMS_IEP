@@ -36,7 +36,8 @@ jobs:
 
       - name: Build
         env:
-          VITE_USE_MOCK: 'true'
+          VITE_API_URL: https://sams-iep-backend-naresh069.onrender.com/api
+          VITE_USE_MOCK: 'false'
         run: npm run build
 
       - name: Add SPA fallback
