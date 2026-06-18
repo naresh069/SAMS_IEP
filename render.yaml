@@ -37,7 +37,6 @@ services:
   - type: web
     name: sams-iep-frontend-naresh069
     runtime: static
-    plan: free
     buildCommand: cd sams-frontend && npm ci && npm run build
     staticPublishPath: ./sams-frontend/dist
     autoDeployTrigger: commit
