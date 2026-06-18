@@ -28,7 +28,7 @@ services:
       - key: DISABLE_SECURITY
         value: false
       - key: ALLOWED_ORIGINS
-        value: https://sams-iep-frontend-naresh069.onrender.com,https://naresh069.github.io,http://localhost:5173,http://127.0.0.1:5173
+        value: https://*.onrender.com,https://naresh069.github.io,http://localhost:5173,http://127.0.0.1:5173
       - key: JWT_SECRET
         generateValue: true
       - key: JWT_EXPIRATION_MS
