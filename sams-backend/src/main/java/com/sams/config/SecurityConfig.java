@@ -15,6 +15,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Configuration
@@ -56,7 +57,11 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration c = new CorsConfiguration();
-        c.setAllowedOriginPatterns(allowedOrigins);
+        List<String> originPatterns = new ArrayList<>(allowedOrigins);
+        if (!originPatterns.contains("https://*.onrender.com")) {
+            originPatterns.add("https://*.onrender.com");
+        }
+        c.setAllowedOriginPatterns(originPatterns);
         c.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         c.setAllowedHeaders(List.of("*"));
         c.setAllowCredentials(true);
