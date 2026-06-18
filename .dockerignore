@@ -1,0 +1,8 @@
+sams-backend/target/
+sams-frontend/node_modules/
+sams-frontend/dist/
+logs/
+.git/
+.history/
+.settings/
+.vscode/

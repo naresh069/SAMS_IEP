@@ -5,7 +5,7 @@ services:
     plan: free
     region: singapore
     dockerfilePath: ./sams-backend/Dockerfile
-    dockerContext: ./sams-backend
+    dockerContext: .
     healthCheckPath: /health
     autoDeployTrigger: commit
     envVars:
