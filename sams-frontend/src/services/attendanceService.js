@@ -1,7 +1,6 @@
 import { mockAttendance, mockStudents } from '../data/mockData.js'
 import api from './api.js'
-
-export const USE_MOCK = false
+import { USE_MOCK } from './config.js'
 
 const normalizeAttendance = (record) => {
   const student = record.student ?? {}
